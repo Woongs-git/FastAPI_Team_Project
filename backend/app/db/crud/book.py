@@ -32,10 +32,11 @@ class BookCrud:
         )
         return result.scalars().all()
 
-    @staticmethod
+   @staticmethod
     async def get_by_genre(db: AsyncSession, genre: str) -> list[Book]:
         result = await db.execute(
             select(Book)
+            .options(selectinload(Book.genre), selectinload(Book.author))  # <--- 이 줄을 추가해주세요!
             .join(Genre, Book.genre_id == Genre.genre_id)
             .filter(Genre.genre_name == genre)
         )
