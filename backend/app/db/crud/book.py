@@ -18,13 +18,12 @@ class BookCrud:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_booktitle(db: AsyncSession, title: str) -> Book | None:
+    async def get_by_booktitle(db: AsyncSession, title: str) -> list[Book]:
         result = await db.execute(select(Book).filter((Book.book_title == title)))
         return result.scalars().all()
 
-
     @staticmethod
-    async def get_by_author(db: AsyncSession, author: str) -> Book | None:
+    async def get_by_author(db: AsyncSession, author: str) -> list[Book]:
         result = await db.execute(
             select(Book)
             .join(Author, Book.author_id == Author.author_id)
@@ -33,10 +32,10 @@ class BookCrud:
         return result.scalars().all()
 
     @staticmethod
-    async def get_by_genre(db: AsyncSession, genre: str) -> Book | None:
+    async def get_by_genre(db: AsyncSession, genre: str) -> list[Book]:
         result = await db.execute(
             select(Book)
-            .join(Author, Book.genre_id == genre.genre_id)
+            .join(Genre, Book.genre_id == Genre.genre_id)
             .filter(Genre.genre_name == genre)
         )
         return result.scalars().all()
@@ -45,13 +44,13 @@ class BookCrud:
     async def update_by_id(
         db: AsyncSession, book_id: int, book: BookUpdate
     ) -> Book | None:
-        db_book = await db.get(Book, book_id)  # select *from books where book_id=(1)
+        db_book = await db.get(Book, book_id)
         if db_book:
             update_data = book.model_dump(exclude_unset=True)
 
             for key, value in update_data.items():
-                setattr(db_book, key, value)  # 골라낸 필드를 자동으로 대입
-            await db.flush()  # 수정한 내용을 DB에 전송 (update books set book_title='aa'...where book_id=(1))
+                setattr(db_book, key, value)
+            await db.flush()
             return db_book
         return None
 
@@ -60,6 +59,6 @@ class BookCrud:
         db_book = await db.get(Book, book_id)
         if db_book:
             await db.delete(db_book)
-            await db.flush()  # delete from books where book_id=(1)
-            return db_book  # 삭제된 객체반환
+            await db.flush()
+            return db_book
         return None
