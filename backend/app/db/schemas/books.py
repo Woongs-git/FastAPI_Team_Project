@@ -3,23 +3,23 @@ from pydantic import BaseModel
 
 class BookBase(BaseModel):
     book_title: str
-    genre_name: str
-    author_name: str
-    pub_name: str
+    genre_id: int
+    author_id: int
+    pub_id: int
 
 
 class BookCreate(BaseModel):
     book_title: str
-    genre_name: str
-    author_name: str
-    pub_name: str
+    genre_id: int
+    author_id: int
+    pub_id: int
 
 
 class BookUpdate(BaseModel):
     book_title: str | None = None
-    genre_name: str | None = None
-    author_name: str | None = None
-    pub_name: str | None = None
+    genre_id: int | None = None
+    author_id: int | None = None
+    pub_id: int | None = None
 
 
 class BookInDB(BookBase):
