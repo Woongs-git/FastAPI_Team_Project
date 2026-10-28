@@ -1,48 +1,39 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.db.database import get_db
-from app.services.book import BookService  # crud 대신 service 임포트
+from app.db.crud.book import BookCrud
 from app.db.schemas.books import BookCreate, BookUpdate
 
-router = APIRouter(
-    prefix="/books",
-    tags=["Books"]
-)
 
-# 1. 도서 등록 (Create)
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_book(book: BookCreate, db: AsyncSession = Depends(get_db)):
-    return await BookService.create_book(db=db, book=book)
+class BookService:
+    @staticmethod
+    async def create_book(db: AsyncSession, book: BookCreate):
+        db_book = await BookCrud.create(db=db, book=book)
+        await db.commit()          # DB에 영구 저장
+        await db.refresh(db_book)  # 생성된 최신 데이터 불러오기
+        return db_book
 
-# 2. 도서 제목으로 조회 (고정된 문자열 경로가 포함된 것을 위로!)
-@router.get("/title/{title}")
-async def get_book_by_title(title: str, db: AsyncSession = Depends(get_db)):
-    book = await BookService.get_book_by_title(db=db, title=title)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book
+    @staticmethod
+    async def get_book_by_id(db: AsyncSession, book_id: int):
+        return await BookCrud.get_by_id(db=db, book_id=book_id)
 
-# 3. 특정 도서 상세 조회 (변수만 받는 단순 경로는 아래로!)
-@router.get("/{book_id}")
-async def get_book_by_id(book_id: int, db: AsyncSession = Depends(get_db)):
-    book = await BookService.get_book_by_id(db=db, book_id=book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book
+    @staticmethod
+    async def get_book_by_title(db: AsyncSession, title: str):
+        result = await BookCrud.get_by_booktitle(db=db, title=title)
+        # crud에서 데이터 추출을 안 했을 경우 여기서 대신 꺼내줌 (500 에러 방지)
+        if hasattr(result, "scalars"):
+            return result.scalars().all()
+        return result
 
-# 4. 도서 수정 (Update)
-@router.put("/{book_id}")
-async def update_book(book_id: int, book: BookUpdate, db: AsyncSession = Depends(get_db)):
-    updated_book = await BookService.update_book(db=db, book_id=book_id, book=book)
-    if not updated_book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return updated_book
+    @staticmethod
+    async def update_book(db: AsyncSession, book_id: int, book: BookUpdate):
+        updated_book = await BookCrud.update_by_id(db=db, book_id=book_id, book=book)
+        if updated_book:
+            await db.commit()
+            await db.refresh(updated_book)
+        return updated_book
 
-# 5. 도서 삭제 (Delete)
-@router.delete("/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_book(book_id: int, db: AsyncSession = Depends(get_db)):
-    deleted_book = await BookService.delete_book(db=db, book_id=book_id)
-    if not deleted_book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return None
+    @staticmethod
+    async def delete_book(db: AsyncSession, book_id: int):
+        deleted_book = await BookCrud.delete_by_id(db=db, book_id=book_id)
+        if deleted_book:
+            await db.commit()
+        return deleted_book
