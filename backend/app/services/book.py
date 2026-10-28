@@ -22,6 +22,16 @@ class BookService:
             return result.scalars().all()
         return result
 
+    # [추가] 작가 이름으로 도서 조회
+    @staticmethod
+    async def get_book_by_author(db: AsyncSession, author: str):
+        return await BookCrud.get_by_author(db=db, author=author)
+
+    # [추가] 장르 이름으로 도서 조회
+    @staticmethod
+    async def get_book_by_genre(db: AsyncSession, genre: str):
+        return await BookCrud.get_by_genre(db=db, genre=genre)
+
     @staticmethod
     async def update_book(db: AsyncSession, book_id: int, book: BookUpdate):
         updated_book = await BookCrud.update_by_id(db=db, book_id=book_id, book=book)
