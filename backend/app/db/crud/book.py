@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.db.models.book import Book, Author, Genre
 from app.db.schemas.books import BookCreate, BookUpdate
 
