@@ -20,7 +20,8 @@ class BookCrud:
     @staticmethod
     async def get_by_booktitle(db: AsyncSession, title: str) -> Book | None:
         result = await db.execute(select(Book).filter((Book.book_title == title)))
-        return result
+        return result.scalars().all()
+
 
     @staticmethod
     async def get_by_author(db: AsyncSession, author: str) -> Book | None:
@@ -29,7 +30,7 @@ class BookCrud:
             .join(Author, Book.author_id == Author.author_id)
             .filter(Author.author_name == author)
         )
-        return result
+        return result.scalars().all()
 
     @staticmethod
     async def get_by_genre(db: AsyncSession, genre: str) -> Book | None:
@@ -38,7 +39,7 @@ class BookCrud:
             .join(Author, Book.genre_id == genre.genre_id)
             .filter(Genre.genre_name == genre)
         )
-        return result
+        return result.scalars().all()
 
     @staticmethod
     async def update_by_id(
