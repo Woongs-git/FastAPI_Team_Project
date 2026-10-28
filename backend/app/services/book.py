@@ -7,8 +7,8 @@ class BookService:
     @staticmethod
     async def create_book(db: AsyncSession, book: BookCreate):
         db_book = await BookCrud.create(db=db, book=book)
-        await db.commit()          # DB에 영구 저장
-        await db.refresh(db_book)  # 생성된 최신 데이터 불러오기
+        await db.commit()
+        await db.refresh(db_book)
         return db_book
 
     @staticmethod
@@ -18,7 +18,6 @@ class BookService:
     @staticmethod
     async def get_book_by_title(db: AsyncSession, title: str):
         result = await BookCrud.get_by_booktitle(db=db, title=title)
-        # crud에서 데이터 추출을 안 했을 경우 여기서 대신 꺼내줌 (500 에러 방지)
         if hasattr(result, "scalars"):
             return result.scalars().all()
         return result
