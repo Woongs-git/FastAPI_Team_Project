@@ -15,18 +15,18 @@ router = APIRouter(
 async def create_book(book: BookCreate, db: AsyncSession = Depends(get_db)):
     return await BookService.create_book(db=db, book=book)
 
-# 2. 특정 도서 상세 조회 (Read - ID로 단건 조회)
-@router.get("/{book_id}")
-async def get_book_by_id(book_id: int, db: AsyncSession = Depends(get_db)):
-    book = await BookService.get_book_by_id(db=db, book_id=book_id)
+# 2. 도서 제목으로 조회 (고정된 문자열 경로가 포함된 것을 위로!)
+@router.get("/title/{title}")
+async def get_book_by_title(title: str, db: AsyncSession = Depends(get_db)):
+    book = await BookService.get_book_by_title(db=db, title=title)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
     return book
 
-# 3. 도서 제목으로 조회
-@router.get("/title/{title}")
-async def get_book_by_title(title: str, db: AsyncSession = Depends(get_db)):
-    book = await BookService.get_book_by_title(db=db, title=title)
+# 3. 특정 도서 상세 조회 (변수만 받는 단순 경로는 아래로!)
+@router.get("/{book_id}")
+async def get_book_by_id(book_id: int, db: AsyncSession = Depends(get_db)):
+    book = await BookService.get_book_by_id(db=db, book_id=book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
     return book
