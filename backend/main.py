@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import Base, async_engine
 from fastapi.concurrency import asynccontextmanager
 from app.routers import user
+from app.routers import user, book
 from app.middleware.token_refresh import TokenRefreshMiddleware
 
 load_dotenv(dotenv_path=".env")
