@@ -39,6 +39,7 @@ app.add_middleware(
 
 # user.py에 만든 라우터를 fastapi앱에 등록함
 app.include_router(user.router)
+app.include_router(book.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8081, reload=True)
