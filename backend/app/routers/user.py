@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, HTTPException, status
 from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services import UserService
-from app.db.schemas.users import UserLogin, UserRead, UserCreate
+from app.db.schemas.users import UserLogin, UserRead, UserCreate, UserUpdate
 from app.core.jwt_handler import get_password_hash
 from app.core.auth import set_auth_cookies, get_user_id
 
@@ -40,3 +40,16 @@ async def logout(response:Response):
     return True
 
 
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
+    delete_user = await UserService.delete_user(db=db, user_id=user_id)
+    if not delete_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return None
+
+@router.put("/{user_id}")
+async def update_user(user_id: int, user: UserUpdate, db: AsyncSession = Depends(get_db)):
+    updated_user = await UserService.update_user(db=db, user_id=user_id, user=user)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return updated_user
